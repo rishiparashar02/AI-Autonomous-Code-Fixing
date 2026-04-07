@@ -1,0 +1,48 @@
+--- original/./cloned_repos\click\examples\completion\completion.py+++ fixed/./cloned_repos\click\examples\completion\completion.py@@ -1,16 +1,42 @@-    out = []
++```python
++out = []
+ 
+-    for value, help in items:
+-        if incomplete in value or incomplete in help:
+-            out.append(CompletionItem(value, help=help))
++for value, help in items:
++    if incomplete in value or incomplete in help:
++        out.append(CompletionItem(value, help=help))
+ 
+-    return out
+-
++return out
+ 
+ @group.command(help="Choose a user")
+ @click.argument("user", shell_complete=list_users)
+ def select_user(user):
+     click.echo(f"Chosen user is {user}")
+ 
++cli.add_command(group)
++``` 
++
++This code seems to be correct and should not throw an "invalid argument error". However, if you are still experiencing the issue, it might be due to the `items` variable not being defined or initialized properly. 
++
++Here is a revised version of the code with some error checking added:
++
++```python
++if not items:
++    raise ValueError("items is empty")
++
++out = []
++
++for value, help in items:
++    if incomplete in value or incomplete in help:
++        out.append(CompletionItem(value, help=help))
++
++return out
++
++@group.command(help="Choose a user")
++@click.argument("user", shell_complete=list_users)
++def select_user(user):
++    if not user:
++        raise ValueError("user is empty")
++    click.echo(f"Chosen user is {user}")
+ 
+ cli.add_command(group)
++```

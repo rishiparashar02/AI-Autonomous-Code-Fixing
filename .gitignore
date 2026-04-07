@@ -1,0 +1,4 @@
+.env
+__pycache__/
+*.pyc
+cloned_repos/

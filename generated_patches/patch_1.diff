@@ -1,0 +1,14 @@
+--- original/./cloned_repos\click\examples\aliases\aliases.py+++ fixed/./cloned_repos\click\examples\aliases\aliases.py@@ -1,3 +1,4 @@+```python
+ self.aliases = {}
+ 
+ def add_alias(self, alias, cmd):
+@@ -9,7 +10,9 @@     try:
+         self.aliases.update(parser.items("aliases"))
+     except configparser.NoSectionError:
+-        pass
++        parser.add_section("aliases")
++        for key, value in parser.items("aliases"):
++            self.aliases.update({key: value})
+ 
+ def write_config(self, filename):
+     parser = configparser.ConfigParser()

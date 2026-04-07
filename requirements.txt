@@ -1,0 +1,4 @@
+gitpython
+groq
+fastapi
+uvicorn[standard]
