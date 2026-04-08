@@ -7,15 +7,16 @@ import uvicorn
 from dotenv import load_dotenv
 import os
 
+# Add the parent directory to sys.path to import from main.py
+import sys
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from main import analyze_bug
 
 # Load environment variables from .env
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-
-if not GROQ_API_KEY:
-    raise ValueError("GROQ_API_KEY not found. Please set it in .env")
 
 
 
@@ -55,6 +56,12 @@ async def analyze_bug_endpoint(request: AnalyzeRequest):
     The response includes information about the repository scan, the suggested fixes, and (if apply_fixes=True) the generated git diff.
     """
     try:
+        if not GROQ_API_KEY:
+            raise HTTPException(
+                status_code=400,
+                detail="GROQ_API_KEY not configured. Set it in environment or .env before analyzing bugs.",
+            )
+
         result = analyze_bug(
             repo_url=request.repo_url,
             bug_description=request.bug_description,

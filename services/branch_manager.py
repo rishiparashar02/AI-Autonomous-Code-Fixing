@@ -27,7 +27,8 @@ def create_fix_branch(repo_path, bug_description):
         pass
 
     # Checkout existing branch or create a new one
-    if branch_name in repo.branches:
+    existing_branches = {branch.name for branch in repo.branches}
+    if branch_name in existing_branches:
         repo.git.checkout(branch_name)
     else:
         repo.git.checkout("-b", branch_name)

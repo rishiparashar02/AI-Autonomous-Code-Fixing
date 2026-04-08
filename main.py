@@ -63,13 +63,14 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
         patch = None
         diff_text = None
         branch_name = None
+        fix_applied = False
         if suggested_fix:
             patch = generate_diff_patch(snip['snippet'], suggested_fix, file_path)
             save_patch_to_file(patch, i)
 
             if apply_fixes:
                 branch_name = create_fix_branch(repo_path, bug_description)
-                apply_ai_fix(file_path, suggested_fix)
+                _, fix_applied = apply_ai_fix(file_path, snip['snippet'], suggested_fix)
                 diff_text = show_git_diff(repo_path)
 
         suggested_fixes.append({
@@ -79,6 +80,7 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
             "suggested_fix": suggested_fix,
             "patch": patch,
             "branch": branch_name,
+            "fix_applied": fix_applied,
             "diff": diff_text,
         })
 
