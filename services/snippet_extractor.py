@@ -1,4 +1,4 @@
-def extract_snippets(file_path, keywords):
+def extract_snippets(file_path, keywords, fallback_if_empty=True):
     """
     Extracts code snippets around lines containing specified keywords in a file.
     
@@ -33,6 +33,12 @@ def extract_snippets(file_path, keywords):
                 # Limit to 3 snippets per file
                 if len(snippets) >= 3:
                     break
+        if not snippets and fallback_if_empty and lines:
+            end = min(len(lines), 21)
+            snippets.append({
+                'line': 1,
+                'snippet': ''.join(lines[0:end])
+            })
     except:
         # Skip files that can't be read
         pass
