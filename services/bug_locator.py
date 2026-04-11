@@ -5,6 +5,11 @@ def _tokenize(text):
     return {token for token in re.findall(r"[a-zA-Z_][a-zA-Z0-9_]+", (text or "").lower()) if len(token) > 2}
 
 
+def bug_description_keywords(bug_description):
+    """Tokens from bug text for snippet keyword matching (same rules as file relevance)."""
+    return _tokenize(bug_description)
+
+
 def find_relevant_files(files, bug_description, fallback_limit=10):
     """
     Finds relevant files based on bug description keywords.

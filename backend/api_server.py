@@ -25,7 +25,7 @@ class AnalyzeRequest(BaseModel):
     bug_description: str
     dest: Optional[str] = "./cloned_repos"
     max_locations: Optional[int] = 5
-    apply_fixes: Optional[bool] = False
+    apply_fixes: Optional[bool] = True
 
 
 app = FastAPI(
@@ -74,8 +74,10 @@ async def analyze_bug_endpoint(request: AnalyzeRequest):
             raise HTTPException(status_code=500, detail="Repository analysis failed (see server logs).")
 
         return result
+    except HTTPException:
+        raise
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 if __name__ == "__main__":

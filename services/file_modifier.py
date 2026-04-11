@@ -1,13 +1,34 @@
+def _normalize_newlines(text):
+    return text.replace("\r\n", "\n").replace("\r", "\n")
+
+
 def _replace_first_snippet_occurrence(file_content, original_snippet, fixed_snippet):
-    """Replace the first exact occurrence of a snippet in file content."""
+    """Replace the first occurrence of a snippet in file content.
+
+    Tries exact match first, then newline-normalized match (CRLF vs LF).
+    """
     if not original_snippet or not fixed_snippet:
         return file_content, False
 
     idx = file_content.find(original_snippet)
+    if idx != -1:
+        updated = (
+            file_content[:idx]
+            + fixed_snippet
+            + file_content[idx + len(original_snippet) :]
+        )
+        return updated, True
+
+    normalized_file = _normalize_newlines(file_content)
+    normalized_snip = _normalize_newlines(original_snippet)
+    normalized_fix = _normalize_newlines(fixed_snippet)
+    idx = normalized_file.find(normalized_snip)
     if idx == -1:
         return file_content, False
 
-    updated = file_content[:idx] + fixed_snippet + file_content[idx + len(original_snippet):]
+    updated = (
+        normalized_file[:idx] + normalized_fix + normalized_file[idx + len(normalized_snip) :]
+    )
     return updated, True
 
 

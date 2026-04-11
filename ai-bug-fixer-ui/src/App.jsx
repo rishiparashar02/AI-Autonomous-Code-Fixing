@@ -68,6 +68,7 @@ function SuggestedCodeBlock({ originalCode, suggestedCode }) {
 function App() {
   const [repoUrl, setRepoUrl] = useState('')
   const [bugDescription, setBugDescription] = useState('')
+  const [applyFixes, setApplyFixes] = useState(true)
   const [results, setResults] = useState(null)
   const [loading, setLoading] = useState(false)
 
@@ -81,7 +82,7 @@ function App() {
       const response = await axios.post('http://localhost:8000/analyze-bug', {
         repo_url: repoUrl,
         bug_description: bugDescription,
-        apply_fixes: false
+        apply_fixes: applyFixes
       })
       setResults(response.data)
     } catch (error) {
@@ -113,6 +114,14 @@ function App() {
             placeholder="Describe the bug..."
           />
         </label>
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={applyFixes}
+            onChange={(e) => setApplyFixes(e.target.checked)}
+          />
+          <span>Apply suggested fixes to the cloned repository (new git branch)</span>
+        </label>
         <button onClick={handleAnalyze} disabled={loading}>
           {loading ? 'Analyzing...' : 'Analyze Bug'}
         </button>
@@ -123,6 +132,18 @@ function App() {
           <h2>Repository Info</h2>
           <p><strong>Repository:</strong> {results.repo}</p>
           <p><strong>Bug:</strong> {results.bug}</p>
+          {results.repo_path && (
+            <p>
+              <strong>Local clone:</strong>{' '}
+              <span className="bug-location-path">{results.repo_path}</span>
+            </p>
+          )}
+          {results.fix_branch && (
+            <p>
+              <strong>Fix branch:</strong>{' '}
+              <span className="bug-location-path">{results.fix_branch}</span>
+            </p>
+          )}
 
           <h2>Files Scanned</h2>
           <p>{results.files_scanned} files were scanned for potential issues.</p>
@@ -155,6 +176,15 @@ function App() {
                 <span className="bug-location-summary-path">
                   {fix.file}:{fix.line}
                 </span>
+                {results.apply_fixes && (
+                  <span
+                    className={
+                      fix.fix_applied ? 'fix-applied-badge' : 'fix-not-applied-badge'
+                    }
+                  >
+                    {fix.fix_applied ? 'Applied to repo' : 'Not applied'}
+                  </span>
+                )}
               </summary>
               <div className="bug-location-content">
                 <div className="code-section">

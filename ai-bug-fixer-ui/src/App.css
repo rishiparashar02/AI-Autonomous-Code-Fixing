@@ -245,6 +245,56 @@
   cursor: not-allowed;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 16px;
+  font-weight: normal;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.fix-applied-badge,
+.fix-not-applied-badge {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.fix-applied-badge {
+  background: rgba(46, 160, 67, 0.25);
+  color: #7ee787;
+  border: 1px solid rgba(63, 185, 80, 0.5);
+}
+
+.fix-not-applied-badge {
+  background: rgba(248, 81, 73, 0.12);
+  color: #ff7b72;
+  border: 1px solid rgba(248, 81, 73, 0.35);
+}
+
+@media (prefers-color-scheme: light) {
+  .fix-applied-badge {
+    color: #116329;
+    background: rgba(46, 160, 67, 0.15);
+  }
+
+  .fix-not-applied-badge {
+    color: #a40e26;
+    background: rgba(248, 81, 73, 0.08);
+  }
+}
+
 .results {
   margin-top: 30px;
   color: var(--text);

@@ -7,7 +7,7 @@ import argparse
 import os
 from services.repo_manager import clone_repository
 from services.file_scanner import scan_source_files
-from services.bug_locator import find_relevant_files
+from services.bug_locator import find_relevant_files, bug_description_keywords
 from services.snippet_extractor import extract_snippets
 from services.ai_patch_generator import generate_patch
 from services.branch_manager import create_fix_branch
@@ -45,7 +45,7 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
     source_files = scan_source_files(repo_path)
     relevant_files = find_relevant_files(source_files, bug_description)
 
-    keywords = set(word.lower() for word in bug_description.split() if len(word) > 2)
+    keywords = bug_description_keywords(bug_description)
     snippets = {}
     for file_path in relevant_files:
         file_snippets = extract_snippets(file_path, keywords)
@@ -57,19 +57,21 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
             all_snippets.append((file_path, snip))
     all_snippets = all_snippets[:max_locations]
 
+    fix_branch_name = None
+    if apply_fixes and all_snippets:
+        fix_branch_name = create_fix_branch(repo_path, bug_description)
+
     suggested_fixes = []
     for i, (file_path, snip) in enumerate(all_snippets, 1):
         suggested_fix = generate_patch(bug_description, snip['snippet'])
         patch = None
         diff_text = None
-        branch_name = None
         fix_applied = False
         if suggested_fix:
             patch = generate_diff_patch(snip['snippet'], suggested_fix, file_path)
             save_patch_to_file(patch, i)
 
             if apply_fixes:
-                branch_name = create_fix_branch(repo_path, bug_description)
                 _, fix_applied = apply_ai_fix(file_path, snip['snippet'], suggested_fix)
                 diff_text = show_git_diff(repo_path)
 
@@ -79,7 +81,7 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
             "original_code": snip['snippet'],
             "suggested_fix": suggested_fix,
             "patch": patch,
-            "branch": branch_name,
+            "branch": fix_branch_name,
             "fix_applied": fix_applied,
             "diff": diff_text,
         })
@@ -87,6 +89,9 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
     return {
         "repo": repo_url,
         "bug": bug_description,
+        "repo_path": repo_path,
+        "fix_branch": fix_branch_name,
+        "apply_fixes": apply_fixes,
         "files_scanned": len(source_files),
         "relevant_files": relevant_files,
         "suggested_fixes": suggested_fixes,
