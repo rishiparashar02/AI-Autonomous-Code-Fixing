@@ -164,7 +164,9 @@ def main():
         print(f"Push status: {result['push_status']}")
     if result.get("fix_summary_file"):
         print(f"Branch summary file: {result['fix_summary_file']}")
-        print(f"To finalize and push manually, run: python finalize_fix.py \"{result['repo_path']}\" \"{result['fix_branch']}\" \"{result['bug']}\"")
+        print(f"To finalize and push manually:")
+        print(f"  Python: python finalize_fix.py \"{result['repo_path']}\" \"{result['fix_branch']}\" \"{result['bug']}\"")
+        print(f"  PowerShell: .\\finalize_fix.ps1 -RepoPath \"{result['repo_path']}\" -BranchName \"{result['fix_branch']}\" -BugDescription \"{result['bug']}\"")
 
     for i, fix in enumerate(result['suggested_fixes'], 1):
         print(f"\nBug Location {i}:")

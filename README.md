@@ -9,7 +9,8 @@ ai-bug-fixer/
 ├── .venv/                     # Python virtual environment
 ├── cloned_repos/              # Temporary cloned repositories
 ├── main.py                    # CLI entry point for analysis
-├── finalize_fix.py            # Script to test, commit, and push fixes
+├── finalize_fix.py            # Python script to test, commit, and push fixes
+├── finalize_fix.ps1           # PowerShell script to test, commit, and push fixes (Windows)
 ├── services/
 │   ├── repo_manager.py        # Repository cloning and management
 │   ├── file_scanner.py        # Source file scanning
@@ -72,8 +73,14 @@ python main.py https://github.com/octocat/Hello-World.git "function not working 
 
 After running the main analysis and applying fixes, use the finalize script to test, commit, and push:
 
+**Python script:**
 ```bash
 python finalize_fix.py <repo_path> <branch_name> "<bug_description>"
+```
+
+**PowerShell script (Windows):**
+```powershell
+.\finalize_fix.ps1 -RepoPath <repo_path> -BranchName <branch_name> -BugDescription "<bug_description>"
 ```
 
 This script will:
@@ -89,8 +96,14 @@ This script will:
 
 ### Example
 
+**Python:**
 ```bash
 python finalize_fix.py ./cloned_repos/my-repo ai-fix-divide-by-zero "fix divide by zero error"
+```
+
+**PowerShell:**
+```powershell
+.\finalize_fix.ps1 -RepoPath ./cloned_repos/my-repo -BranchName ai-fix-divide-by-zero -BugDescription "fix divide by zero error"
 ```
 
 ## Branch and fix behavior
