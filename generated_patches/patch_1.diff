@@ -1,11 +1,8 @@
---- original/./cloned_repos\ai-bug-test-repo\main.py+++ fixed/./cloned_repos\ai-bug-test-repo\main.py@@ -1,3 +1,10 @@-from math.utils import divide
-+```python
-+from math import gcd
+--- original/./cloned_repos\ai-bug-test-repo\main.py+++ fixed/./cloned_repos\ai-bug-test-repo\main.py@@ -4,6 +4,8 @@ def divide(a, b):
+     if b == 0:
+         raise ValueError("Cannot divide by zero")
++    if a == 0:
++        return 0  # or any other default value
+     return a / b
  
--print(divide(10,2))+def divide(a, b):
-+    if b == 0:
-+        raise ValueError("Cannot divide by zero")
-+    return a / b
-+
-+print(divide(10, 2))
-+```
+ print(divide(10, 2))

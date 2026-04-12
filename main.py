@@ -14,6 +14,9 @@ from services.branch_manager import create_fix_branch
 from services.file_modifier import apply_ai_fix
 from services.patch_generator import generate_patch as generate_diff_patch, save_patch_to_file
 from services.diff_viewer import show_git_diff
+from services.git_commit_manager import commit_changes, push_branch
+from services.fix_summary import create_fix_summary_file
+from services.test_runner import run_tests
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -62,6 +65,9 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
         fix_branch_name = create_fix_branch(repo_path, bug_description)
 
     suggested_fixes = []
+    changed_files = set()
+    overall_diff = None
+
     for i, (file_path, snip) in enumerate(all_snippets, 1):
         suggested_fix = generate_patch(bug_description, snip['snippet'])
         patch = None
@@ -73,7 +79,10 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
 
             if apply_fixes:
                 _, fix_applied = apply_ai_fix(file_path, snip['snippet'], suggested_fix)
-                diff_text = show_git_diff(repo_path)
+                if fix_applied:
+                    changed_files.add(file_path)
+                    overall_diff = show_git_diff(repo_path)
+                    diff_text = overall_diff
 
         suggested_fixes.append({
             "file": file_path,
@@ -86,6 +95,33 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
             "diff": diff_text,
         })
 
+    test_results = None
+    push_status = None
+    fix_summary_file = None
+
+    if apply_fixes:
+        test_results = run_tests(repo_path)
+        if changed_files:
+            fix_summary_file = create_fix_summary_file(
+                repo_path,
+                fix_branch_name,
+                bug_description,
+                sorted(changed_files),
+            )
+            commit_message = f"AI fix branch {fix_branch_name}: {bug_description}"
+            committed = commit_changes(repo_path, commit_message)
+            if committed:
+                if test_results["status"] in ("passed", "skipped"):
+                    push_status = push_branch(repo_path, fix_branch_name)
+                else:
+                    push_status = (
+                        f"Changes committed locally, but push skipped because tests status is '{test_results['status']}'."
+                    )
+            else:
+                push_status = "No file changes were committed."
+        else:
+            push_status = "No file changes were detected; nothing committed or pushed."
+
     return {
         "repo": repo_url,
         "bug": bug_description,
@@ -95,6 +131,9 @@ def analyze_bug(repo_url, bug_description, dest="./cloned_repos", max_locations=
         "files_scanned": len(source_files),
         "relevant_files": relevant_files,
         "suggested_fixes": suggested_fixes,
+        "test_results": test_results,
+        "push_status": push_status,
+        "fix_summary_file": fix_summary_file,
     }
 
 
@@ -117,6 +156,15 @@ def main():
     print(f"Source Files Found: {result['files_scanned']}")
     print(f"Relevant Files: {len(result['relevant_files'])}")
     print(f"Code Snippets: {len(result['suggested_fixes'])}")
+    if result.get("fix_branch"):
+        print(f"Fix branch: {result['fix_branch']}")
+    if result.get("test_results"):
+        print(f"Test status: {result['test_results']['status']}")
+    if result.get("push_status"):
+        print(f"Push status: {result['push_status']}")
+    if result.get("fix_summary_file"):
+        print(f"Branch summary file: {result['fix_summary_file']}")
+        print(f"To finalize and push manually, run: python finalize_fix.py \"{result['repo_path']}\" \"{result['fix_branch']}\" \"{result['bug']}\"")
 
     for i, fix in enumerate(result['suggested_fixes'], 1):
         print(f"\nBug Location {i}:")

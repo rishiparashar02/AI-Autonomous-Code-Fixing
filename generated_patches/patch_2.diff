@@ -1,7 +1,8 @@
---- original/./cloned_repos\ai-bug-test-repo\math_utils.py+++ fixed/./cloned_repos\ai-bug-test-repo\math_utils.py@@ -1,2 +1,6 @@+```python
+--- original/./cloned_repos\ai-bug-test-repo\math_utils.py+++ fixed/./cloned_repos\ai-bug-test-repo\math_utils.py@@ -1,6 +1,6 @@ ```python
  def divide(a, b):
--    return a / 0
-+    if b == 0:
-+        raise ValueError("Cannot divide by zero")
-+    return a / b
-+```
+     if b == 0:
+-        raise ValueError("Cannot divide by zero")
+-    return a / b
++        raise ZeroDivisionError("Cannot divide by zero")
++    return a / float(b)
+ ```

@@ -144,6 +144,22 @@ function App() {
               <span className="bug-location-path">{results.fix_branch}</span>
             </p>
           )}
+          {results.test_results && (
+            <p>
+              <strong>Test status:</strong> {results.test_results.status}
+            </p>
+          )}
+          {results.push_status && (
+            <p>
+              <strong>Push status:</strong> {results.push_status}
+            </p>
+          )}
+          {results.fix_summary_file && (
+            <p>
+              <strong>Branch summary file:</strong>{' '}
+              <span className="bug-location-path">{results.fix_summary_file}</span>
+            </p>
+          )}
 
           <h2>Files Scanned</h2>
           <p>{results.files_scanned} files were scanned for potential issues.</p>

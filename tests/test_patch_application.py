@@ -111,6 +111,16 @@ def test_analyze_bug_apply_fixes_updates_repo_files(tmp_path, monkeypatch):
     monkeypatch.setattr("main.save_patch_to_file", lambda patch, index: None)
     monkeypatch.setattr("main.create_fix_branch", lambda rp, bug: "ai-fix-test-branch")
     monkeypatch.setattr("main.show_git_diff", lambda rp: "git-diff-stub")
+    monkeypatch.setattr("main.run_tests", lambda rp: {
+        "status": "skipped",
+        "summary": "No tests detected.",
+        "returncode": None,
+        "stdout": "",
+        "stderr": "",
+    })
+    monkeypatch.setattr("main.commit_changes", lambda rp, msg: True)
+    monkeypatch.setattr("main.push_branch", lambda rp, branch: "Branch pushed to origin.")
+    monkeypatch.setattr("main.create_fix_summary_file", lambda rp, branch, bug, files: str(repo_path / "AI_FIX_SUMMARY_ai-fix-test-branch.md"))
 
     result = analyze_bug(
         repo_url="https://github.com/example/test.git",

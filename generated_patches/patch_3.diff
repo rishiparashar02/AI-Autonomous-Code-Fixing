@@ -1,5 +1,6 @@
---- original/./cloned_repos\ai-bug-test-repo\string_utils.py+++ fixed/./cloned_repos\ai-bug-test-repo\string_utils.py@@ -1,2 +1,4 @@+```python
+--- original/./cloned_repos\ai-bug-test-repo\string_utils.py+++ fixed/./cloned_repos\ai-bug-test-repo\string_utils.py@@ -1,4 +1,6 @@ ```python
  def reverse_string(s):
--    return s.revers()
-+    return s[::-1]
-+```
++    if not isinstance(s, str):
++        raise TypeError("Input must be a string")
+     return s[::-1]
+ ```
