@@ -1,146 +1,193 @@
 # AI Autonomous Bug Fixing System
 
-An intelligent system that analyzes GitHub repositories to locate and extract code snippets related to bug descriptions.
+An intelligent, end-to-end system that analyzes GitHub repositories to detect bug-related code, extract relevant snippets, and optionally apply AI-driven fixes in an automated workflow.
 
-## Project Structure
+---
+
+## 📁 Project Structure
 
 ```
 ai-bug-fixer/
 ├── .venv/                     # Python virtual environment
 ├── cloned_repos/              # Temporary cloned repositories
-├── main.py                    # CLI entry point for analysis
-├── finalize_fix.py            # Python script to test, commit, and push fixes
-├── finalize_fix.ps1           # PowerShell script to test, commit, and push fixes (Windows)
+├── backend/
+│   └── api_server.py          # FastAPI backend server
+├── frontend/                  # Frontend application (e.g., Vite/React)
+├── main.py                    # CLI entry point
 ├── services/
-│   ├── repo_manager.py        # Repository cloning and management
-│   ├── file_scanner.py        # Source file scanning
-│   ├── bug_locator.py         # Bug-related file identification
-│   ├── snippet_extractor.py   # Code snippet extraction
-│   ├── ai_patch_generator.py  # AI-powered patch generation
-│   ├── branch_manager.py      # Git branch management
-│   ├── file_modifier.py       # File modification utilities
-│   ├── patch_generator.py     # Patch file generation
-│   ├── diff_viewer.py         # Git diff display
-│   ├── git_commit_manager.py  # Git commit and push operations
-│   ├── fix_summary.py         # Branch summary generation
-│   └── test_runner.py         # Test execution utilities
+│   ├── repo_manager.py        # Handles repository cloning & cleanup
+│   ├── file_scanner.py        # Scans and filters source files
+│   ├── bug_locator.py         # Identifies bug-relevant files
+│   └── snippet_extractor.py   # Extracts contextual code snippets
 ├── utils/
-│   └── logger.py              # Logging utilities
-├── tests/                     # Unit tests
+│   └── logger.py              # Logging utility
 ├── requirements.txt
 └── README.md
 ```
 
-## Prerequisites
+---
 
-- Python 3.x
-- Git installed on your system
+## 🚀 Features
 
-## Installation
+- Automatic GitHub repository cloning  
+- Intelligent source file scanning  
+- Keyword-based bug localization  
+- Context-aware code snippet extraction  
+- AI-assisted bug fixing (optional)  
+- Automatic branch creation for fixes  
+- Test execution (if available)  
+- Summary report generation  
 
-1. Clone this repository or navigate to the project directory
-2. Create and activate virtual environment:
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate  # On Windows
-   ```
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+---
 
-## Usage
+## ⚙️ Prerequisites
 
-Run the system using the command line interface:
+- Python 3.x  
+- Node.js & npm  
+- Git (added to system PATH)  
+
+---
+
+## 🧰 Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone <your-repo-url>
+cd ai-bug-fixer
+```
+
+### 2. Setup Python Virtual Environment
+
+```bash
+python -m venv .venv
+```
+
+Activate the environment:
+
+**Windows**
+```bash
+.venv\Scripts\activate
+```
+
+**Mac/Linux**
+```bash
+source .venv/bin/activate
+```
+
+### 3. Install Backend Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Install Frontend Dependencies
+
+```bash
+cd frontend
+npm install
+```
+
+---
+
+## ▶️ Running the Application
+
+### 🔹 Run Backend (FastAPI)
+
+```bash
+python -m uvicorn backend.api_server:app --reload
+```
+
+- Default: http://127.0.0.1:8000  
+
+---
+
+### 🔹 Run Frontend
+
+```bash
+npm run dev
+```
+
+- Default: http://localhost:5173  
+
+---
+
+### 🔹 Run via CLI
 
 ```bash
 python main.py <repo_url> "<bug_description>" [--dest <destination>]
 ```
 
-### Arguments
-
-- `repo_url`: GitHub repository URL (e.g., "https://github.com/microsoft/vscode.git")
-- `bug_description`: Description of the bug to analyze (in quotes)
-- `--dest`: Optional destination directory for cloned repos (default: "./cloned_repos")
-
-### Example
+#### Example
 
 ```bash
 python main.py https://github.com/octocat/Hello-World.git "function not working properly"
 ```
 
-## Finalize Fix Script
+---
 
-After running the main analysis and applying fixes, use the finalize script to test, commit, and push:
+## 🔄 System Workflow (Pipeline)
 
-**Python script:**
+1. **Repository Cloning**
+   - Clones repo if not present  
+
+2. **File Scanning**
+   - Supports `.py`, `.js`, `.java`  
+
+3. **Bug Localization**
+   - Matches keywords with code  
+
+4. **Snippet Extraction**
+   - Extracts surrounding code context  
+
+---
+
+## 🌿 Branch & Fix Behavior
+
+- Creates a new branch  
+- Applies AI fixes  
+- Generates summary README  
+- Runs tests (if available)  
+- Commits & pushes changes  
+
+---
+
+## 📊 Output
+
+- Total source files  
+- Relevant files  
+- Extracted snippets  
+- File paths + line numbers + code  
+
+---
+
+## 🛠 Troubleshooting
+
+- Git not installed → add to PATH  
+- Permission denied → check folder access  
+- No snippets → change keywords  
+- Invalid URL → verify repo link  
+- Network issues → check internet  
+
+Install GitPython if needed:
+
 ```bash
-python finalize_fix.py <repo_path> <branch_name> "<bug_description>"
+pip install gitpython
 ```
 
-**PowerShell script (Windows):**
-```powershell
-.\finalize_fix.ps1 -RepoPath <repo_path> -BranchName <branch_name> -BugDescription "<bug_description>"
-```
+---
 
-This script will:
-- Run repository tests
-- If tests pass, commit changes and push to the new branch
-- Create a summary README in the branch
+## 📦 Dependencies
 
-### Arguments
+- GitPython  
+- FastAPI / Uvicorn  
+- Node.js  
 
-- `repo_path`: Path to the cloned repository (e.g., "./cloned_repos/repo-name")
-- `branch_name`: The AI-generated branch name (shown in analysis output)
-- `bug_description`: The same bug description used in analysis
+---
 
-### Example
+## 💡 Future Improvements
 
-**Python:**
-```bash
-python finalize_fix.py ./cloned_repos/my-repo ai-fix-divide-by-zero "fix divide by zero error"
-```
-
-**PowerShell:**
-```powershell
-.\finalize_fix.ps1 -RepoPath ./cloned_repos/my-repo -BranchName ai-fix-divide-by-zero -BugDescription "fix divide by zero error"
-```
-
-## Branch and fix behavior
-
-When fixes are applied, the system will:
-- create a new branch in the cloned repository based on the bug description
-- write the AI changes into the source files on that branch
-- generate a branch summary README file listing the changed files
-- run repository tests if a test suite is detected
-- commit the changes locally and push the branch to origin if possible
-
-## Pipeline
-
-The system follows a 4-step pipeline:
-
-1. **Repository Cloning**: Clones the GitHub repository if not already present
-2. **File Scanning**: Identifies all source code files (.py, .js, .java)
-3. **Bug Location**: Finds files containing keywords from the bug description
-4. **Snippet Extraction**: Extracts code snippets around matching lines
-
-## Output
-
-The system provides:
-- Count of source files found
-- Count of relevant files identified
-- Count of code snippets extracted
-- Detailed code snippets with file paths and line numbers
-
-## Troubleshooting
-
-- **Git not installed**: Ensure Git is available in your PATH
-- **Permission denied**: Check write permissions for the destination directory
-- **No snippets found**: Try different keywords or check if the repository contains the expected file types
-- **Invalid URL**: Verify the repository URL is correct and accessible.
-- **Network issues**: Check your internet connection if cloning fails.
-- **GitPython errors**: Ensure GitPython is properly installed via `pip install gitpython`.
-
-## Dependencies
-
-- GitPython: A Python library used to interact with Git repositories.
+- Semantic search (embeddings)  
+- Multi-language support  
+- Auto PR creation  
+- CI/CD integration  
