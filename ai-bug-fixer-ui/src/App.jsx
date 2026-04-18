@@ -65,6 +65,22 @@ function SuggestedCodeBlock({ originalCode, suggestedCode }) {
   return <CodeBlock code={lines.join('\n')} lineKinds={kinds} />
 }
 
+function NewBranchSwitch({ checked, onChange, disabled }) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      aria-label="Apply fixes on a new git branch"
+      disabled={disabled}
+      className={`new-branch-switch${checked ? ' new-branch-switch--on' : ''}`}
+      onClick={() => onChange(!checked)}
+    >
+      <span className="new-branch-switch__thumb" aria-hidden />
+    </button>
+  )
+}
+
 function App() {
   const [repoUrl, setRepoUrl] = useState('')
   const [bugDescription, setBugDescription] = useState('')
@@ -82,7 +98,7 @@ function App() {
       const response = await axios.post('http://localhost:8000/analyze-bug', {
         repo_url: repoUrl,
         bug_description: bugDescription,
-        apply_fixes: applyFixes
+        apply_fixes: applyFixes,
       })
       setResults(response.data)
     } catch (error) {
@@ -95,100 +111,195 @@ function App() {
 
   return (
     <div className="app">
-      <h1>AI Autonomous Bug Fixing System</h1>
-      <div className="input-section">
-        <label>
-          GitHub Repository URL:
-          <input
-            type="text"
-            value={repoUrl}
-            onChange={(e) => setRepoUrl(e.target.value)}
-            placeholder="https://github.com/user/repo"
-          />
-        </label>
-        <label>
-          Bug Description:
-          <textarea
-            value={bugDescription}
-            onChange={(e) => setBugDescription(e.target.value)}
-            placeholder="Describe the bug..."
-          />
-        </label>
-        <label className="checkbox-row">
-          <input
-            type="checkbox"
-            checked={applyFixes}
-            onChange={(e) => setApplyFixes(e.target.checked)}
-          />
-          <span>Apply suggested fixes to the cloned repository (new git branch)</span>
-        </label>
-        <button onClick={handleAnalyze} disabled={loading}>
-          {loading ? 'Analyzing...' : 'Analyze Bug'}
-        </button>
+      <header className="app-header">
+        <div className="app-header__brand">
+          <span className="app-logo" aria-hidden>
+            ◈
+          </span>
+          <div>
+            <p className="app-kicker">Autonomous repair</p>
+            <h1 className="app-title">AI Bug Fixer</h1>
+          </div>
+        </div>
+        <div className="app-header__pills" aria-label="Workflow">
+          <span className="pill">Scan</span>
+          <span className="pill pill--accent">Suggest</span>
+          <span className="pill">Ship</span>
+        </div>
+      </header>
+
+      <div className="layout-grid">
+        <section className="panel panel--form" aria-labelledby="run-heading">
+          <h2 id="run-heading" className="panel__title">
+            Run an analysis
+          </h2>
+          <p className="panel__lede">
+            Drop a repo link, describe the glitchy behavior, and let the model hunt likely hotspots.
+          </p>
+
+          <div className="field">
+            <label className="field__label" htmlFor="repo-url">
+              GitHub repository URL
+            </label>
+            <input
+              id="repo-url"
+              className="field__input"
+              type="url"
+              inputMode="url"
+              autoComplete="url"
+              value={repoUrl}
+              onChange={(e) => setRepoUrl(e.target.value)}
+              placeholder="https://github.com/you/cool-app"
+            />
+          </div>
+
+          <div className="field">
+            <label className="field__label" htmlFor="bug-desc">
+              Bug description
+            </label>
+            <textarea
+              id="bug-desc"
+              className="field__input field__input--textarea"
+              value={bugDescription}
+              onChange={(e) => setBugDescription(e.target.value)}
+              placeholder="Repro steps, expected vs actual, errors in console…"
+              rows={5}
+            />
+          </div>
+
+          <div className="branch-card">
+            <div className="branch-card__header">
+              <div>
+                <h3 className="branch-card__title">New branch workflow</h3>
+                <p className="branch-card__subtitle">
+                  When enabled, fixes are written on a fresh git branch in the cloned repo — not on your
+                  default branch.
+                </p>
+              </div>
+              <NewBranchSwitch
+                checked={applyFixes}
+                onChange={setApplyFixes}
+                disabled={loading}
+              />
+            </div>
+            <p className={`branch-card__status${applyFixes ? ' is-on' : ''}`}>
+              {applyFixes
+                ? 'On — patches land on an isolated fix branch after analysis.'
+                : 'Off — analysis only; nothing is committed to a new branch.'}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="cta"
+            onClick={handleAnalyze}
+            disabled={loading}
+          >
+            <span className="cta__shine" aria-hidden />
+            {loading ? 'Running analysis…' : 'Analyze bug'}
+          </button>
+        </section>
+
+        <aside className="panel panel--aside" aria-label="Tips">
+          <h2 className="panel__title">Make it hit different</h2>
+          <ul className="tip-list">
+            <li>
+              <strong>Be specific.</strong> Mention files, endpoints, or error strings if you know them.
+            </li>
+            <li>
+              <strong>Public repos</strong> work best for quick clones — keep tokens out of the URL field.
+            </li>
+            <li>
+              <strong>New branch mode</strong> is ideal when you still want main untouched while you review
+              diffs.
+            </li>
+          </ul>
+          <div className="aside-glow" aria-hidden />
+        </aside>
       </div>
 
       {results && (
-        <div className="results">
-          <h2>Repository Info</h2>
-          <p><strong>Repository:</strong> {results.repo}</p>
-          <p><strong>Bug:</strong> {results.bug}</p>
-          {results.repo_path && (
-            <p>
-              <strong>Local clone:</strong>{' '}
-              <span className="bug-location-path">{results.repo_path}</span>
+        <section className="results" aria-label="Analysis results">
+          <div className="results__intro">
+            <h2 className="results__heading">Results</h2>
+            <p className="results__meta">
+              {results.repo && (
+                <>
+                  <span className="meta-chip">{results.repo}</span>
+                  {results.fix_branch && (
+                    <span className="meta-chip meta-chip--branch">{results.fix_branch}</span>
+                  )}
+                </>
+              )}
             </p>
-          )}
-          {results.fix_branch && (
-            <p>
-              <strong>Fix branch:</strong>{' '}
-              <span className="bug-location-path">{results.fix_branch}</span>
-            </p>
-          )}
-          {results.test_results && (
-            <p>
-              <strong>Test status:</strong> {results.test_results.status}
-            </p>
-          )}
-          {results.push_status && (
-            <p>
-              <strong>Push status:</strong> {results.push_status}
-            </p>
-          )}
-          {results.fix_summary_file && (
-            <p>
-              <strong>Branch summary file:</strong>{' '}
-              <span className="bug-location-path">{results.fix_summary_file}</span>
-            </p>
-          )}
+          </div>
 
-          <h2>Files Scanned</h2>
-          <p>{results.files_scanned} files were scanned for potential issues.</p>
+          <div className="results-grid">
+            <article className="result-card">
+              <h3 className="result-card__title">Repository</h3>
+              <p className="result-card__body">
+                <strong>Bug:</strong> {results.bug}
+              </p>
+              {results.repo_path && (
+                <p className="result-card__body">
+                  <strong>Local clone:</strong>{' '}
+                  <span className="bug-location-path">{results.repo_path}</span>
+                </p>
+              )}
+              {results.fix_branch && (
+                <p className="result-card__body">
+                  <strong>Fix branch:</strong>{' '}
+                  <span className="bug-location-path">{results.fix_branch}</span>
+                </p>
+              )}
+              {results.test_results && (
+                <p className="result-card__body">
+                  <strong>Test status:</strong> {results.test_results.status}
+                </p>
+              )}
+              {results.push_status && (
+                <p className="result-card__body">
+                  <strong>Push status:</strong> {results.push_status}
+                </p>
+              )}
+              {results.fix_summary_file && (
+                <p className="result-card__body">
+                  <strong>Branch summary file:</strong>{' '}
+                  <span className="bug-location-path">{results.fix_summary_file}</span>
+                </p>
+              )}
+            </article>
 
-          <h2>Relevant Files</h2>
-          <ul>
-            {results.relevant_files.map((file, index) => (
-              <li key={index}>{file}</li>
-            ))}
-          </ul>
+            <article className="result-card">
+              <h3 className="result-card__title">Scan overview</h3>
+              <p className="result-card__body">{results.files_scanned} files scanned.</p>
+              <h4 className="result-card__subtitle">Relevant files</h4>
+              <ul className="result-list">
+                {results.relevant_files.map((file, index) => (
+                  <li key={index}>{file}</li>
+                ))}
+              </ul>
+            </article>
 
-          <h2>Bug Locations</h2>
-          <ul className="bug-locations-list">
-            {results.suggested_fixes.map((fix, index) => (
-              <li key={index}>
-                <span className="bug-location-path">
-                  {fix.file}:{fix.line}
-                </span>
-              </li>
-            ))}
-          </ul>
+            <article className="result-card result-card--wide">
+              <h3 className="result-card__title">Bug locations</h3>
+              <ul className="bug-locations-list">
+                {results.suggested_fixes.map((fix, index) => (
+                  <li key={index}>
+                    <span className="bug-location-path">
+                      {fix.file}:{fix.line}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
 
-          <h2>AI Suggested Fix</h2>
+          <h2 className="results__section-title">AI suggested fixes</h2>
           {results.suggested_fixes.map((fix, index) => (
             <details key={index} className="bug-location-card">
               <summary className="bug-location-summary">
-                <span className="bug-location-summary-label">
-                  Bug Location {index + 1}:
-                </span>
+                <span className="bug-location-summary-label">Bug location {index + 1}</span>
                 <span className="bug-location-summary-path">
                   {fix.file}:{fix.line}
                 </span>
@@ -204,11 +315,11 @@ function App() {
               </summary>
               <div className="bug-location-content">
                 <div className="code-section">
-                  <h4>Original Code</h4>
+                  <h4>Original code</h4>
                   <CodeBlock code={fix.original_code} />
                 </div>
                 <div className="code-section code-section--suggested">
-                  <h4>AI Suggested Fix</h4>
+                  <h4>AI suggested fix</h4>
                   {fix.suggested_fix ? (
                     <SuggestedCodeBlock
                       originalCode={fix.original_code}
@@ -236,7 +347,7 @@ function App() {
               </div>
             </details>
           ))}
-        </div>
+        </section>
       )}
     </div>
   )
