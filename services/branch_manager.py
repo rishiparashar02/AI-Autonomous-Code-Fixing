@@ -12,11 +12,17 @@ def create_fix_branch(repo_path, bug_description):
     Returns:
         str: The name of the branch checked out.
     """
-    # Convert description to a safe branch name
-    normalized = bug_description.strip().lower()
-    normalized = re.sub(r"[^a-z0-9]+", "-", normalized)
-    normalized = normalized.strip("-")
-    branch_name = f"ai-fix-{normalized}" if normalized else "ai-fix"
+    # Extract key words from description (skip common filler)
+    common_words = {'the', 'is', 'are', 'a', 'an', 'and', 'or', 'if', 'bug', 'bugs', 'fix', 'fixes', 'error', 'issue', 'please', 'check', 'any', 'more', 'changes', 'needed', 'everything', 'correct', 'already', 'you', 'just'}
+    words = re.findall(r'\b[a-z]+\b', bug_description.lower())
+    key_words = [w for w in words if w not in common_words][:2]  # Take first 2 significant words
+    
+    if key_words:
+        normalized = '-'.join(key_words)
+    else:
+        normalized = "issue"
+    
+    branch_name = f"ai-fix-{normalized}"
 
     repo = Repo(repo_path)
 

@@ -89,28 +89,47 @@ npm install
 ```
 
 ---
-
 ## ▶️ Running the Application
 
-### 🔹 Run Backend (FastAPI)
+### 🔹 Run the Backend (FastAPI)
+
+Activate the virtual environment and start the FastAPI server:
+
+```powershell
+cd "..\AI Autonomous Bug Fixing System" #go to root folder
+.venv\Scripts\Activate.ps1              #activate virtual enviornment
+python -m uvicorn backend.api_server:app --reload
+```
+
+Or run it directly from the project root:
 
 ```bash
 python -m uvicorn backend.api_server:app --reload
 ```
 
-- Default: http://127.0.0.1:8000  
+**Backend URL:** `http://127.0.0.1:8000`
 
 ---
 
-### 🔹 Run Frontend
+### 🔹 Run the Frontend
+
+Start the Vite development server:
 
 ```bash
 npm run dev
 ```
 
-- Default: http://localhost:5173  
+**Frontend URL:** `http://localhost:5173`
 
 ---
+
+### ✅ Verify the Setup
+
+1. Start the backend server.
+2. Start the frontend development server.
+3. Open `http://localhost:5173` in your browser.
+4. Ensure the frontend can communicate with the backend running at `http://127.0.0.1:8000`.
+
 
 ### 🔹 Run via CLI
 

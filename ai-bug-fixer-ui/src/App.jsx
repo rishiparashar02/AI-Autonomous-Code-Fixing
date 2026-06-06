@@ -225,9 +225,9 @@ function App() {
             <p className="results__meta">
               {results.repo && (
                 <>
-                  <span className="meta-chip">{results.repo}</span>
+                  <span className="meta-chip">Repo Link: {results.repo}</span>
                   {results.fix_branch && (
-                    <span className="meta-chip meta-chip--branch">{results.fix_branch}</span>
+                    <span className="meta-chip meta-chip--branch">Bug Description: {results.fix_branch}</span>
                   )}
                 </>
               )}
